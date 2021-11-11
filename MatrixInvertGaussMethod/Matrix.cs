@@ -17,6 +17,7 @@ namespace MatrixInvertGaussMethod
         //create matrix with certain amoung of rows and columns
         public Matrix(int rows, int cols, params double[] elements )
         {
+            if (elements.Length != rows * cols) throw new Exception("Podano " + elements.Length + " elementów. Oczekiwano: " + rows * cols);
             this._matrix = new double[rows, cols];
             for(var i = 0; i < rows; i++)
                 for(var j = 0; j < cols; j++)
@@ -48,14 +49,14 @@ namespace MatrixInvertGaussMethod
 
         }
 
-        public double[] GetRow(int rowNumber)
+        private double[] GetRow(int rowNumber)
         {
             return Enumerable.Range(0, this.Cols).Select(x => this._matrix[rowNumber, x]).ToArray();
         }
 
         public Matrix Concat(Matrix matrix)
         {
-            if (this.Rows != matrix.Rows) throw new Exception("Concat: Liczba wierzy musi być równa w obu macierzach");
+            if (this.Rows != matrix.Rows) throw new Exception("Concat: Liczba wierszy musi być równa w obu macierzach");
 
             var resultParams = new double[0];
 
@@ -67,7 +68,17 @@ namespace MatrixInvertGaussMethod
             return new Matrix(this.Rows, this.Cols + matrix.Cols, resultParams);
         }
 
-        public Matrix RowTimesScalar(int rowNumber, double scalar)
+        public Matrix SliceVertical(int startColumn, int numberOfColumns)
+        {
+            var resultParams = new double[0];
+            for(var i = 0; i < this.Rows; i++)
+            {
+                resultParams = resultParams.Concat(Enumerable.Range(startColumn, numberOfColumns).Select(x => this._matrix[i, x])).ToArray();
+            }
+            return new Matrix(this.Rows, numberOfColumns, resultParams);
+        }
+
+        private Matrix RowTimesScalar(int rowNumber, double scalar)
         {
             var multipliedRow = this.GetRow(rowNumber);
             for (var i = 0; i < multipliedRow.Length; i++) multipliedRow[i] *= scalar;
@@ -75,7 +86,7 @@ namespace MatrixInvertGaussMethod
             return new Matrix(this, multipliedRow, rowNumber);
         }
 
-        public Matrix ZeroElem(int rowOneNumber, int rowTwoNumber, double scalar)
+        private Matrix ZeroElem(int rowOneNumber, int rowTwoNumber, double scalar)
         {
             var rowOne = this.GetRow(rowOneNumber);
             var rowTwo = this.GetRow(rowTwoNumber);
@@ -86,10 +97,12 @@ namespace MatrixInvertGaussMethod
         }
 
         public Matrix Invert() {
-            Matrix result = this;
+            if (this.Rows != this.Cols) throw new Exception("Macierz nie jest kwadratowa");
+            Matrix result = this.Concat(new Matrix(this.Rows)); // append an identity matrix to the right of our matrix
 
             for(var j = 0; j < this.Rows; j++)
             {
+                if (result.GetMatrix[j, j] == 0) throw new Exception("Macierz nie jest odwracalna");
                 result = result.RowTimesScalar(j, 1/result.GetMatrix[j, j]);
                 for(int i = j+1; i < this.Rows; i++)
                 {
@@ -107,7 +120,7 @@ namespace MatrixInvertGaussMethod
                 }
             }
 
-            return result;
+            return result.SliceVertical(result.Cols/2, result.Cols/2);
         }
 
         public Matrix Print()

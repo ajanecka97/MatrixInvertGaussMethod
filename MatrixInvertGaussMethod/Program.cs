@@ -8,11 +8,19 @@ namespace MatrixInvertGaussMethod
         {
             try
             {
-                Matrix matrix = new Matrix(3, 3, 2, 2, 3, 4, 7, 1, 8, 1, 9);
-                Matrix matrix2 = new Matrix(3);
+                Console.WriteLine("Podaj rozmiar macierzy: ");
+                int size = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Podaj {0} liczb oddzielonych spacjami: ", size*size);
+                string[] numbersAsStrings = Console.ReadLine().Split(" ");
+                var numbers = new double[numbersAsStrings.Length];
+                for(var i = 0; i < numbersAsStrings.Length; i++)
+                {
+                    numbers[i] = Convert.ToDouble(numbersAsStrings[i]);
+                }
+
+                Matrix matrix = new Matrix(size, size, numbers);
+
                 matrix
-                    .Print()
-                    .Concat(matrix2)
                     .Print()
                     .Invert()
                     .Print();
