@@ -49,11 +49,6 @@ namespace MatrixInvertGaussMethod
 
         }
 
-        private double[] GetRow(int rowNumber)
-        {
-            return Enumerable.Range(0, this.Cols).Select(x => this._matrix[rowNumber, x]).ToArray();
-        }
-
         public Matrix Concat(Matrix matrix)
         {
             if (this.Rows != matrix.Rows) throw new Exception("Concat: Liczba wierszy musi być równa w obu macierzach");
@@ -76,24 +71,6 @@ namespace MatrixInvertGaussMethod
                 resultParams = resultParams.Concat(Enumerable.Range(startColumn, numberOfColumns).Select(x => this._matrix[i, x])).ToArray();
             }
             return new Matrix(this.Rows, numberOfColumns, resultParams);
-        }
-
-        private Matrix RowTimesScalar(int rowNumber, double scalar)
-        {
-            var multipliedRow = this.GetRow(rowNumber);
-            for (var i = 0; i < multipliedRow.Length; i++) multipliedRow[i] *= scalar;
-
-            return new Matrix(this, multipliedRow, rowNumber);
-        }
-
-        private Matrix ZeroElem(int rowOneNumber, int rowTwoNumber, double scalar)
-        {
-            var rowOne = this.GetRow(rowOneNumber);
-            var rowTwo = this.GetRow(rowTwoNumber);
-
-            for (var i = 0; i < rowOne.Length; i++) rowOne[i] -= rowTwo[i] * scalar;
-
-            return new Matrix(this, rowOne, rowOneNumber);
         }
 
         public Matrix Invert() {
@@ -134,6 +111,29 @@ namespace MatrixInvertGaussMethod
             Console.WriteLine();
 
             return this;
+        }
+
+        private Matrix RowTimesScalar(int rowNumber, double scalar)
+        {
+            var multipliedRow = this.GetRow(rowNumber);
+            for (var i = 0; i < multipliedRow.Length; i++) multipliedRow[i] *= scalar;
+
+            return new Matrix(this, multipliedRow, rowNumber);
+        }
+
+        private Matrix ZeroElem(int rowOneNumber, int rowTwoNumber, double scalar)
+        {
+            var rowOne = this.GetRow(rowOneNumber);
+            var rowTwo = this.GetRow(rowTwoNumber);
+
+            for (var i = 0; i < rowOne.Length; i++) rowOne[i] -= rowTwo[i] * scalar;
+
+            return new Matrix(this, rowOne, rowOneNumber);
+        }
+
+        private double[] GetRow(int rowNumber)
+        {
+            return Enumerable.Range(0, this.Cols).Select(x => this._matrix[rowNumber, x]).ToArray();
         }
     }
 }
